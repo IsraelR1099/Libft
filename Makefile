@@ -6,12 +6,16 @@
 #    By: irifarac <irifarac@student.42barcel>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/17 13:46:45 by irifarac          #+#    #+#              #
-#    Updated: 2024/05/12 18:34:44 by israel           ###   ########.fr        #
+#    Updated: 2025/01/27 13:28:20 by irifarac         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CREATION_LIB = ar -crs
-CFLAGS = -Wall -Werror -Wextra
+
+WARNING_FLAGS := -Wall -Wextra -Werror -Wshadow -MMD -pedantic
+DEBUG_FLAGS := -g -Og
+INCLUDES := -I./src
+CFLAGS := $(WARNING_FLAGS) $(DEBUG_FLAGS) $(INCLUDES)
 NAME = libft.a
 # Define directories
 SRC_DIR = src
@@ -67,18 +71,20 @@ BONUS_SRC = $(addprefix $(SRC_DIR)/, \
 
 BONUS_OBJ = $(addprefix $(OBJ_DIR)/, $(BONUS_SRC:.c=.o))
 OBJ = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC:.c=.o)))
+DEP = $(addsuffix .d, $(basename $(OBJ)))
 INCLUDE = $(SRC_DIR)/libft.h
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(OBJ_DIR)
-	@echo "Compilando"
-	gcc $(CFLAGS) -c $< -o $@
+all: $(NAME)
 
-$(NAME): $(OBJ) $(INCLUDE)
+-include $(DEP)
+$(NAME): $(OBJ)
 	$(CREATION_LIB) $(NAME) $(OBJ)
 	@echo "Compiling"
 
-all: $(NAME)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c Makefile
+	@mkdir -p $(OBJ_DIR)
+	@echo "Compilando $<"
+	gcc $(CFLAGS) -c $< -o $@
 
 bonus : $(NAME) $(BONUS_OBJ)
 	$(CREATION_LIB) $(NAME) $(BONUS_OBJ)
